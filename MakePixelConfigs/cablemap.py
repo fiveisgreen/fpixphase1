@@ -37,18 +37,27 @@ def printnametranslation(xmlfilename):
             towrite=row['Official name of position']+'_ROC%s'%str(x)+'         '+tbmcore +'        '+row['FEC position']+'      '+row['mfec']+'     '+row['mfecchannel'] +'     '+row['HubID']+'      '+ '%i'%d +'      '+ str(x) + '      '+row['FED ID']+'       '+ fedch+'     '+str(rocn)+'\n'
             nametranslationfile.write(towrite)
 
-def printportcardmap(xmlfilename):
-    dictionary = getdict(xmlfilename)
+def printportcardmap(csvfilename):
+#produces a port card map of the form:
+## Portcard              Module                     AOH channel
+#Pilt_BmI_D3_PRT1        Pilt_BmI_D3_BLD6_PNL1       A       1
+#Pilt_BmI_D3_PRT1        Pilt_BmI_D3_BLD6_PNL1       B       1 
+    dictionary = getdict(csvfilename)
     portcardmapfile=open("ConfigDat/portcardmap.dat","w")
-    portcardmapfile.write("# Portcard             Module                     AOH channel") 
+    portcardmapfile.write("# Portcard              Module                     AOH channel\n")
 
     for row in dictionary:
-        fedch=''
-        fedchs=row['FED channel'].split('/')
-        if len(fedchs)<2:continue
-        portcard=list(row['PC position Mirror'])[-1]
-        print portcard
-        towrite='FPix_BpO_D1_PRT'+'           '+row['Official name of position']  
+        Official_name_of_position = row['Official name of position']
+        if Official_name_of_position == '': continue
+        module   = Official_name_of_position[:string.find(Official_name_of_position,"_RNG")]
+        portcard = Official_name_of_position[:string.find(Official_name_of_position,"_PNL")]
+        DOH = row['DOH A/B']
+        POH_fiber_channel = row['POH fiber color']
+        POH_fiber_channel = POH_fiber_channel[string.find(POH_fiber_channel,'-')+1:]
+        print POH_fiber_channel
+        towrite="%s\t%s\t%s\t%s\n"%(portcard, module, DOH,POH_fiber_channel)
+        portcardmapfile.write(towrite)
+    portcardmapfile.close()
  
 def mapfedidPOHbundle(bundlenumber):
     dictionary = getdict('csv/cablingmap_fpixphase1_BpO.csv')
